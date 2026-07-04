@@ -1,0 +1,48 @@
+services:
+  db:
+    image: postgres:16
+    container_name: wholesale_smartstore_db
+    environment:
+      POSTGRES_DB: wholesale_mvp
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d wholesale_mvp"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+    container_name: wholesale_smartstore_backend
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+
+  admin:
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+    container_name: wholesale_smartstore_admin
+    environment:
+      API_BASE_URL: http://backend:8000
+    depends_on:
+      - backend
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./admin:/app
+
+volumes:
+  postgres_data:
