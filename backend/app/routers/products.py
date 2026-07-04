@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
 from app.database import get_db
-from app.models import MasterProduct, SupplierProduct
+from app.models import MasterProduct, MasterProductOption, SupplierProduct
 from app.services.master_product_service import approve_master_product as approve_master
 from app.services.master_product_service import create_master_from_supplier
 
@@ -16,12 +16,25 @@ class MasterProductUpdate(BaseModel):
     cleaned_name: str | None = None
     description: str | None = None
     category_id: str | None = None
+    brand: str | None = None
+    manufacturer: str | None = None
+    origin: str | None = None
+    search_tags: list[str] | None = None
+    notice_info_json: dict | None = None
     sale_price: int | None = None
     shipping_fee: int | None = None
     main_image_url: str | None = None
     detail_image_urls: list[str] | None = None
     certification_info: dict | None = None
     needs_review: bool | None = None
+
+
+class MasterProductOptionUpdate(BaseModel):
+    option_name: str | None = None
+    option_value: str | None = None
+    sale_price: int | None = None
+    stock_quantity: int | None = None
+    status: str | None = None
 
 
 @router.get("/supplier-products")
@@ -137,6 +150,8 @@ def list_master_products(
                 "id": product.id,
                 "internal_product_code": product.internal_product_code,
                 "name": product.cleaned_name,
+                "brand": product.brand,
+                "origin": product.origin,
                 "supply_price": product.supply_price,
                 "shipping_fee": product.shipping_fee,
                 "sale_price": product.sale_price,
@@ -145,6 +160,7 @@ def list_master_products(
                 "status": product.status,
                 "review_status": product.review_status,
                 "needs_review": product.needs_review,
+                "validation_status": product.validation_status,
                 "option_count": len(product.options),
             }
             for product in products
@@ -184,6 +200,11 @@ def get_master_product_detail(master_product_id: int, db: Session = Depends(get_
         "cleaned_name": product.cleaned_name,
         "description": product.description,
         "category_id": product.category_id,
+        "brand": product.brand,
+        "manufacturer": product.manufacturer,
+        "origin": product.origin,
+        "search_tags": product.search_tags or [],
+        "notice_info_json": product.notice_info_json or {},
         "supply_price": product.supply_price,
         "shipping_fee": product.shipping_fee,
         "sale_price": product.sale_price,
@@ -196,6 +217,8 @@ def get_master_product_detail(master_product_id: int, db: Session = Depends(get_
         "review_status": product.review_status,
         "price_review_required": product.price_review_required,
         "needs_review": product.needs_review,
+        "validation_status": product.validation_status,
+        "validation_issues_json": product.validation_issues_json or [],
         "options": [
             {
                 "id": option.id,
@@ -254,3 +277,20 @@ def update_master_product(
     db.commit()
     db.refresh(product)
     return {"status": "ok", "master_product_id": product.id}
+
+
+@router.patch("/master-product-options/{master_option_id}")
+def update_master_product_option(
+    master_option_id: int,
+    payload: MasterProductOptionUpdate,
+    db: Session = Depends(get_db),
+) -> dict:
+    option = db.get(MasterProductOption, master_option_id)
+    if option is None:
+        raise HTTPException(status_code=404, detail="master product option not found")
+
+    for field, value in payload.model_dump(exclude_unset=True).items():
+        setattr(option, field, value)
+    db.commit()
+    db.refresh(option)
+    return {"status": "ok", "master_option_id": option.id}
