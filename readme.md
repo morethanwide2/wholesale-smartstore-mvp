@@ -1,7 +1,18 @@
-echo "# wholesale-smartstore-mvp" >> README.md
-git init
-git add README.md
-git commit -m "first commit"
-git branch -M main
-git remote add origin https://github.com/morethanwide2/wholesale-smartstore-mvp.git
-git push -u origin main
+# wholesale-smartstore-mvp
+
+도매몰 상품 API 연동 기반 스마트스토어 자동등록 MVP 프로젝트입니다.
+
+## 목표
+
+온라인 도매몰 상품을 API로 수집하고, 내부 상품 DB를 거쳐 스마트스토어에 자동 등록하는 MVP 시스템을 개발합니다.
+
+## 1차 개발 범위
+
+- 도매몰 상품 Mock 수집
+- 상품 마스터 DB 생성
+- 판매가/마진 계산
+- 스마트스토어 Mock 등록
+- 재고/품절 동기화 구조
+- 주문 수집 Mock
+- 발주대기 생성
+- Streamlit 관리자 화면
