@@ -4,12 +4,18 @@ from app.models import MasterProduct, MasterProductOption
 from app.services.smartstore.mapper import build_product_payload
 
 
-def test_build_product_payload_maps_options() -> None:
+def test_build_product_payload_maps_listing_fields_and_options() -> None:
     master = MasterProduct(
         internal_product_code="MP-000001",
         supplier_product_id=1,
         product_name="원본 상품명",
         cleaned_name="정제 상품명",
+        brand="무브랜드",
+        manufacturer="테스트 제조사",
+        origin="중국",
+        search_tags=["텀블러", "생활용품"],
+        notice_info_json={"notice_category": "기타"},
+        certification_info={"kc": "해당없음"},
         supply_price=10_000,
         shipping_fee=3_000,
         sale_price=16_900,
@@ -32,6 +38,9 @@ def test_build_product_payload_maps_options() -> None:
     payload = build_product_payload(master)
 
     assert payload["originProduct"]["name"] == "정제 상품명"
+    assert payload["originProduct"]["brand"] == "무브랜드"
+    assert payload["originProduct"]["searchTags"] == ["텀블러", "생활용품"]
+    assert payload["originProduct"]["noticeInfo"] == {"notice_category": "기타"}
     assert payload["options"][0]["internalOptionCode"] == "MO-000001"
 
 
