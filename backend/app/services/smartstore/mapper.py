@@ -19,7 +19,12 @@ def build_product_payload(master_product: MasterProduct) -> dict:
                 "detailImageUrls": master_product.detail_image_urls or [],
             },
             "detailContent": master_product.description or "",
+            "brand": master_product.brand,
+            "manufacturer": master_product.manufacturer,
+            "origin": master_product.origin,
+            "searchTags": master_product.search_tags or [],
             "certificationInfo": master_product.certification_info or {},
+            "noticeInfo": master_product.notice_info_json or {},
             "deliveryInfo": {
                 "deliveryFeeType": "PAID" if master_product.shipping_fee else "FREE",
                 "baseFee": master_product.shipping_fee,

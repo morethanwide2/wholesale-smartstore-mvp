@@ -37,6 +37,11 @@ def create_master_from_supplier(db: Session, supplier_product_id: int) -> Master
         cleaned_name=clean_result.cleaned_name,
         description=supplier_product.raw_description,
         category_id=supplier_product.raw_category,
+        brand=supplier_product.brand,
+        manufacturer=supplier_product.manufacturer,
+        origin=supplier_product.origin,
+        search_tags=[],
+        notice_info_json={},
         supply_price=supplier_product.supply_price,
         shipping_fee=supplier_product.shipping_fee,
         sale_price=sale_price,
@@ -48,6 +53,8 @@ def create_master_from_supplier(db: Session, supplier_product_id: int) -> Master
         status=status,
         review_status="pending",
         needs_review=clean_result.needs_review,
+        validation_status="not_checked",
+        validation_issues_json=[],
     )
     db.add(master)
     db.flush()
